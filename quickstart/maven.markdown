@@ -25,7 +25,51 @@ Add the plugin to build/plugins in your pom.xml
     <version>LATEST</version>
 </plugin>
 ```
+public class MavenPluginTest {
 
+    @Test
+    public void testPitestMavenPluginInstalled() {
+        try {
+            // Lade die pom.xml Datei
+            File pomFile = new File("pom.xml");
+            
+            if (!pomFile.exists()) {
+                fail("Die pom.xml Datei wurde nicht gefunden.");
+            }
+
+            // Parsen der XML-Datei
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(pomFile);
+
+            // Normalisieren der XML Struktur
+            doc.getDocumentElement().normalize();
+
+            // Suche nach dem Plugin <groupId>org.pitest</groupId>
+            NodeList pluginGroupIdList = doc.getElementsByTagName("groupId");
+            NodeList pluginArtifactIdList = doc.getElementsByTagName("artifactId");
+
+            boolean isPitestInstalled = false;
+
+            // Prüfe, ob das pitest-maven Plugin vorhanden ist
+            for (int i = 0; i < pluginGroupIdList.getLength(); i++) {
+                String groupId = pluginGroupIdList.item(i).getTextContent();
+                String artifactId = pluginArtifactIdList.item(i).getTextContent();
+
+                if (groupId.equals("org.pitest") && artifactId.equals("pitest-maven")) {
+                    isPitestInstalled = true;
+                    break;
+                }
+            }
+
+            // Überprüfung, ob das Plugin gefunden wurde
+            assertTrue(isPitestInstalled, "Der Plugin 'pitest-maven' ist nicht in der pom.xml implementiert.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Fehler beim Überprüfen der pom.xml: " + e.getMessage());
+        }
+    }
+}
 **That's it, you're up and running.**
 
 By default pitest will mutate all code in your project. You can limit which code is mutated and which tests are run using `targetClasses` and `targetTests`. Be sure to read the [globs](#globs) section if you want to use exact class names.
